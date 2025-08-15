@@ -20,16 +20,27 @@ const PORT=process.env.PORT||4000;
 
 //database connect
 database.connect();
+const allowedOrigins = [
+  "http://localhost:3001", // local dev
+  "https://vercelbackend-iml9.vercel.app" // deployed frontend
+];
 
 //middlewares
 app.use(express.json());
 app.use(cookieParser());
 app.use(
-    cors({
-        origin:"http://localhost:3001",
-        credentials:true,
-    })
-)//we want that the req coming from frontend hoisted at 3000 to be entertained by backend
+  cors({
+    origin: function (origin, callback) {
+      // allow requests with no origin (like Postman)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) === -1) {
+        return callback(new Error("CORS policy not allowed"), false);
+      }
+      return callback(null, true);
+    },
+    credentials: true
+  })
+);     //we want that the req coming from frontend hoisted at 3000 to be entertained by backend
 app.use(
     fileUpload({
         useTempFiles:true,
